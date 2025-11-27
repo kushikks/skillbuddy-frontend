@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { Users, BookOpen, User, LogOut } from "lucide-react";
 
 const Dashboard = () => {
@@ -42,6 +43,7 @@ const Dashboard = () => {
             SkillBuddy
           </div>
           <div className="flex items-center gap-4">
+            <ThemeToggle />
             <Button
               variant="ghost"
               onClick={() => navigate("/explore")}

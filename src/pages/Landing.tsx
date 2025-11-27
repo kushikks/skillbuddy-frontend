@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { Users, BookOpen, Sparkles, ArrowRight } from "lucide-react";
 
 const Landing = () => {
@@ -39,8 +40,9 @@ const Landing = () => {
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex gap-3"
+            className="flex gap-3 items-center"
           >
+            <ThemeToggle />
             <Button
               variant="ghost"
               onClick={() => navigate("/login")}

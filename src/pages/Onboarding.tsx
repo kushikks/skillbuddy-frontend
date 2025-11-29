@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { SkillTag } from "@/components/SkillTag";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowRight, ArrowLeft, Check } from "lucide-react";
+import { createStudentProfile, fetchLatestStudentProfile } from "@/services/studentService";
 
 const Onboarding = () => {
   const navigate = useNavigate();
@@ -16,7 +17,9 @@ const Onboarding = () => {
   
   // Step 1
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [course, setCourse] = useState("");
+  const [campus, setCampus] = useState("");
   const [year, setYear] = useState("");
   const [bio, setBio] = useState("");
 
@@ -102,11 +105,69 @@ const Onboarding = () => {
   };
 
   const handleComplete = () => {
-    toast({
-      title: "Profile created!",
-      description: "Welcome to SkillBuddy!",
-    });
-    navigate("/dashboard");
+    // This handler now creates the student profile in Supabase
+    (async () => {
+      try {
+        // Map interactionMode and learningStyle arrays to single DB values
+        const mapInteractionMode = (modes: string[]) => {
+          const lower = modes.map((m) => m.toLowerCase());
+          if (lower.includes("online") && lower.includes("offline")) return "hybrid";
+          if (lower.includes("offline")) return "offline";
+          return "online";
+        };
+
+        const mapLearningStyle = (styles: string[]) => {
+          if (styles.length > 1) return "mixed";
+          if (styles.length === 0) return "mixed";
+          const s = styles[0].toLowerCase();
+          if (s.includes("visual")) return "visual";
+          if (s.includes("auditory")) return "auditory";
+          if (s.includes("reading")) return "reading_writing";
+          if (s.includes("hand") || s.includes("hands")) return "kinesthetic";
+          return "mixed";
+        };
+
+        const payload = {
+          fullName: name,
+          email,
+          campus,
+          bio,
+          interactionMode: mapInteractionMode(interactionMode),
+          learningStyle: mapLearningStyle(learningStyle),
+          availableTimeSlots: availability,
+        };
+
+        await createStudentProfile(payload);
+        toast({
+          title: "Profile created!",
+          description: "Saved to Supabase.",
+        });
+        navigate("/dashboard");
+      } catch (err: any) {
+        toast({
+          title: "Error saving profile",
+          description: err?.message ?? String(err),
+          variant: "destructive",
+        });
+      }
+    })();
+  };
+
+  const [latestProfile, setLatestProfile] = useState<any | null>(null);
+
+  const handleFetchLatest = async () => {
+    try {
+      const row = await fetchLatestStudentProfile();
+      if (!row) {
+        toast({ title: "No profiles found", description: "No students in DB yet." });
+        setLatestProfile(null);
+        return;
+      }
+      setLatestProfile(row);
+      toast({ title: "Latest profile loaded" });
+    } catch (err: any) {
+      toast({ title: "Error fetching", description: err?.message ?? String(err), variant: "destructive" });
+    }
   };
 
   return (
@@ -157,6 +218,18 @@ const Onboarding = () => {
                   />
                 </div>
 
+                <div>
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    className="mt-2"
+                  />
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="course">Course/Major</Label>
@@ -165,6 +238,16 @@ const Onboarding = () => {
                       value={course}
                       onChange={(e) => setCourse(e.target.value)}
                       placeholder="Computer Science"
+                      className="mt-2"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="campus">Campus</Label>
+                    <Input
+                      id="campus"
+                      value={campus}
+                      onChange={(e) => setCampus(e.target.value)}
+                      placeholder="Main Campus"
                       className="mt-2"
                     />
                   </div>
@@ -410,6 +493,25 @@ const Onboarding = () => {
                     </div>
                   </div>
                 </div>
+
+                <div className="mt-4 flex items-center justify-between">
+                  <Button type="button" onClick={handleFetchLatest} className="bg-secondary">
+                    Fetch Latest Profile
+                  </Button>
+                  <div className="text-sm text-muted-foreground">You can fetch the latest stored student from Supabase.</div>
+                </div>
+
+                {latestProfile && (
+                  <div className="mt-4 bg-card rounded-xl p-4 border">
+                    <h4 className="font-semibold">Latest Student</h4>
+                    <p className="text-sm text-muted-foreground mt-1">{latestProfile.full_name} • {latestProfile.email}</p>
+                    <p className="mt-2">{latestProfile.bio}</p>
+                    <div className="flex gap-4 mt-3 text-sm">
+                      <div><strong>Mode:</strong> {latestProfile.interaction_mode}</div>
+                      <div><strong>Style:</strong> {latestProfile.learning_style}</div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

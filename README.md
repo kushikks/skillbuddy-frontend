@@ -71,3 +71,25 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+
+
+## Tech Stack
+
+- Frontend: Lovable-generated React app
+- Backend: Supabase (PostgreSQL) with `Students` table
+- Collaboration: Fork → Branch → PR workflow (Student 1 & Student 2)
+
+## Database Schema (Supabase)
+
+Table: `Students`
+
+- `id` (uuid, primary key)
+- `full_name` (text, required)
+- `email` (text, required)
+- `campus` (text, required)
+- `bio` (text, required)
+- `interaction_mode` (text, required)
+- `learning_style` (text, required)
+- `available_time_slots` (jsonb)
+- `created_at` (timestamptz, default `now()`)
+- `updated_at` (timestamptz, default `now()`)

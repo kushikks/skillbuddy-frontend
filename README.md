@@ -1,4 +1,5 @@
 # Welcome to your Lovable project
+i have not accepted the pr yet
 
 ## Project info
 

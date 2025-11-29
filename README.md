@@ -1,5 +1,5 @@
 # Welcome to your Lovable project
-i have not accepted the pr yet
+i have not accepted the pr yet, making changes.
 
 ## Project info
 
